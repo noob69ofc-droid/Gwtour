@@ -1,0 +1,3079 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EFC TOUR — Cyber Admin Control</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- Firebase SDKs (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+  <style>
+    :root {
+      --bg: #020612;
+      --bg2: #050d24;
+      --card: rgba(10, 22, 54, 0.7);
+      --card2: rgba(15, 32, 75, 0.85);
+      --line: rgba(30, 80, 180, 0.28);
+      --line-hover: rgba(0, 180, 255, 0.55);
+      
+      /* Neon Electric Cyber Blues */
+      --accent: #0088ff;
+      --accent-glow: #00e5ff;
+      --accent2: #0051ff;
+      --gold: #ffb703;
+      --green: #00f59b;
+      --yellow: #ffb703;
+      --purple: #8338ec;
+      
+      --text: #f0f6fc;
+      --sub: #8ea8db;
+      --sub2: #526f9e;
+      --glow: 0 0 25px rgba(0, 140, 255, 0.45);
+      --radius: 18px;
+      --sidebar-w: 265px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 140, 255, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(0, 229, 255, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(5, 13, 36, 0.95) 0%, #020612 100%);
+      background-attachment: fixed;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(4, 10, 26, 0.8);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 6px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* ===================== PASSWORD GATE ===================== */
+    #gate-frame {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 40%, rgba(0, 120, 255, 0.18), transparent 70%), var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 20px;
+    }
+
+    .gate-card {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(145deg, rgba(12, 26, 64, 0.75), rgba(4, 10, 28, 0.9));
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      padding: 44px 34px;
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 136, 255, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gate-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+    }
+
+    .gate-logo {
+      width: 96px;
+      height: 96px;
+      border-radius: 28px;
+      margin: 0 auto 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0d2766, #040d24);
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 35px rgba(0, 136, 255, 0.55), inset 0 0 15px rgba(0, 229, 255, 0.3);
+      position: relative;
+    }
+
+    .gate-logo i {
+      font-size: 38px;
+      color: var(--accent-glow);
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.9);
+    }
+
+    .gate-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      color: #fff;
+    }
+
+    .gate-sub {
+      font-size: 13.5px;
+      color: var(--sub);
+      margin-top: 6px;
+      margin-bottom: 30px;
+    }
+
+    .gate-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(3, 7, 20, 0.7);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 18px;
+      margin-bottom: 20px;
+      transition: all .25s ease;
+    }
+
+    .gate-input-wrap:focus-within {
+      border-color: var(--accent-glow);
+      box-shadow: 0 0 20px rgba(0, 136, 255, 0.4);
+      background: rgba(5, 12, 34, 0.9);
+    }
+
+    .gate-input-wrap i {
+      color: var(--accent);
+      font-size: 16px;
+    }
+
+    .gate-input-wrap input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: inherit;
+      font-size: 16px;
+      padding: 16px 4px;
+      letter-spacing: 4px;
+      text-align: center;
+    }
+
+    .gate-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 14.5px;
+      letter-spacing: .5px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: var(--glow);
+      cursor: pointer;
+      transition: all .25s ease;
+    }
+
+    .gate-btn:hover {
+      filter: brightness(1.2);
+      transform: translateY(-2px);
+      box-shadow: 0 0 35px rgba(0, 136, 255, 0.7);
+    }
+
+    .gate-error {
+      color: #ff3366;
+      font-size: 12.5px;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .gate-note {
+      font-size: 11.5px;
+      color: var(--sub2);
+      margin-top: 26px;
+      line-height: 1.6;
+    }
+
+    .gate-note a {
+      color: var(--accent-glow);
+      font-weight: 600;
+    }
+
+    /* ===================== APP SHELL ===================== */
+    #admin-shell {
+      display: none;
+      min-height: 100vh;
+      grid-template-columns: var(--sidebar-w) 1fr;
+    }
+
+    #admin-shell.active {
+      display: grid;
+    }
+
+    /* ---- Sidebar ---- */
+    .sidebar {
+      background: rgba(5, 11, 28, 0.85);
+      backdrop-filter: blur(25px);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      z-index: 40;
+      transition: transform .25s ease;
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(0, 136, 255, 0.08), transparent);
+    }
+
+    .sidebar-brand .logo-mini {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0d2766, #030a1c);
+      border: 1.5px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0, 136, 255, 0.35);
+    }
+
+    .sidebar-brand .logo-mini img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .sidebar-brand .logo-mini i {
+      color: var(--accent-glow);
+      font-size: 20px;
+    }
+
+    .sidebar-brand .brand-text {
+      min-width: 0;
+    }
+
+    .sidebar-brand .brand-text .bt1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: .5px;
+      color: #fff;
+    }
+
+    .sidebar-brand .brand-text .bt2 {
+      font-size: 10px;
+      color: var(--sub);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 1px;
+      font-weight: 600;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 14px;
+    }
+
+    .nav-group-label {
+      font-size: 10px;
+      color: var(--sub2);
+      letter-spacing: 1.6px;
+      padding: 16px 12px 6px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--sub);
+      cursor: pointer;
+      position: relative;
+      margin-bottom: 4px;
+      transition: all .2s ease;
+      border: 1px solid transparent;
+    }
+
+    .nav-link i {
+      width: 18px;
+      text-align: center;
+      font-size: 15px;
+      color: var(--sub2);
+      transition: all .2s ease;
+    }
+
+    .nav-link:hover {
+      background: rgba(0, 136, 255, 0.08);
+      color: #fff;
+      border-color: rgba(0, 136, 255, 0.18);
+    }
+
+    .nav-link:hover i {
+      color: var(--accent-glow);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(90deg, rgba(0, 136, 255, 0.22), rgba(0, 136, 255, 0.04));
+      color: #fff;
+      font-weight: 600;
+      border: 1px solid rgba(0, 140, 255, 0.35);
+      box-shadow: inset 4px 0 0 var(--accent-glow), 0 4px 15px rgba(0, 136, 255, 0.15);
+    }
+
+    .nav-link.active i {
+      color: var(--accent-glow);
+    }
+
+    .nav-link .nb {
+      margin-left: auto;
+      background: var(--accent);
+      color: #fff;
+      font-size: 9.5px;
+      font-weight: 700;
+      min-width: 19px;
+      height: 19px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+      box-shadow: 0 0 12px rgba(0, 136, 255, 0.6);
+    }
+
+    .sidebar-footer {
+      padding: 18px 20px;
+      border-top: 1px solid var(--line);
+      font-size: 11px;
+      color: var(--sub2);
+      text-align: center;
+      line-height: 1.7;
+      background: rgba(3, 7, 20, 0.6);
+    }
+
+    .sidebar-footer b {
+      color: var(--accent-glow);
+    }
+
+    .sidebar-footer a {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ---- Main column ---- */
+    .main-col {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(5, 11, 28, 0.7);
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+
+    .topbar .hamburger {
+      display: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--card2);
+      border: 1px solid var(--line);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-right: 14px;
+      color: #fff;
+    }
+
+    .topbar .page-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar .page-title i {
+      color: var(--accent-glow);
+      text-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .admin-chip {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(12, 26, 64, 0.85);
+      border: 1px solid var(--line);
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 12.5px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .admin-chip i {
+      color: var(--green);
+      font-size: 8.5px;
+      box-shadow: 0 0 8px var(--green);
+      border-radius: 50%;
+    }
+
+    .lock-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(12, 26, 64, 0.85);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--accent-glow);
+      transition: all .2s ease;
+    }
+
+    .lock-btn:hover {
+      background: rgba(0, 136, 255, 0.2);
+      border-color: var(--accent-glow);
+      box-shadow: 0 0 15px rgba(0, 136, 255, 0.4);
+    }
+
+    .content-area {
+      flex: 1;
+      padding: 32px;
+      max-width: 1260px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .page-view {
+      display: none;
+      animation: fadeIn .3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .page-view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-footer-dev {
+      margin-top: 40px;
+      padding: 22px;
+      text-align: center;
+      border-top: 1px dashed var(--line);
+      font-size: 11.5px;
+      color: var(--sub2);
+    }
+
+    .page-footer-dev b {
+      color: var(--accent-glow);
+    }
+
+    .page-footer-dev a {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* ===================== STAT CARDS ===================== */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: linear-gradient(155deg, rgba(16, 35, 82, 0.75), rgba(7, 16, 42, 0.85));
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      transition: all .25s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--line-hover);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 136, 255, 0.2);
+    }
+
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      top: -35px;
+      right: -35px;
+      width: 105px;
+      height: 105px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 180, 255, 0.22), transparent 70%);
+    }
+
+    .stat-card .sc-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 136, 255, 0.15);
+      border: 1px solid rgba(0, 180, 255, 0.3);
+      color: var(--accent-glow);
+      font-size: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 15px rgba(0, 136, 255, 0.2);
+    }
+
+    .stat-card .sc-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      color: #fff;
+    }
+
+    .stat-card .sc-label {
+      font-size: 12.5px;
+      color: var(--sub);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ===================== SECTION HEADER / TOOLBAR ===================== */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+
+    .section-head .sh-sub {
+      font-size: 12.5px;
+      color: var(--sub);
+      margin-top: 4px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(7, 16, 42, 0.85);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 16px;
+      transition: all .25s ease;
+    }
+
+    .search-box:focus-within {
+      border-color: var(--accent-glow);
+      box-shadow: 0 0 15px rgba(0, 136, 255, 0.3);
+    }
+
+    .search-box i {
+      color: var(--sub);
+      font-size: 14px;
+    }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      padding: 12px 4px;
+      min-width: 200px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 22px;
+      border-radius: 13px;
+      border: none;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .25s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: var(--glow);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 30px rgba(0, 136, 255, 0.7);
+      filter: brightness(1.15);
+    }
+
+    .btn-ghost {
+      background: rgba(12, 26, 64, 0.8);
+      color: #e1ebfa;
+      border: 1px solid var(--line);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(0, 136, 255, 0.15);
+      border-color: var(--accent-glow);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(0, 136, 255, 0.25);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #00b377, var(--green));
+      color: #021a10;
+      box-shadow: 0 0 20px rgba(0, 245, 155, 0.3);
+    }
+
+    .btn-danger {
+      background: rgba(255, 51, 102, 0.15);
+      color: #ff3366;
+      border: 1px solid rgba(255, 51, 102, 0.35);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 51, 102, 0.25);
+      box-shadow: 0 0 20px rgba(255, 51, 102, 0.3);
+    }
+
+    .btn-sm {
+      padding: 8px 15px;
+      font-size: 12px;
+      border-radius: 10px;
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .tab-strip {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .tab-chip {
+      padding: 10px 20px;
+      border-radius: 30px;
+      background: rgba(7, 16, 42, 0.8);
+      border: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sub);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .2s ease;
+    }
+
+    .tab-chip:hover {
+      color: #fff;
+      border-color: var(--line-hover);
+    }
+
+    .tab-chip.active {
+      background: rgba(0, 136, 255, 0.2);
+      border-color: var(--accent-glow);
+      color: var(--accent-glow);
+      box-shadow: 0 0 15px rgba(0, 136, 255, 0.35);
+    }
+
+    /* ===================== DATA CARD / LIST ROW ===================== */
+    .data-card {
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .data-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+      transition: background .15s ease;
+    }
+
+    .data-row:hover {
+      background: rgba(0, 136, 255, 0.05);
+    }
+
+    .data-row:last-child {
+      border-bottom: none;
+    }
+
+    .dr-thumb {
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      background: #03081a;
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .dr-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .dr-thumb i {
+      color: var(--accent-glow);
+      font-size: 20px;
+    }
+
+    .dr-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .dr-main .dt {
+      font-size: 14.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #fff;
+    }
+
+    .dr-main .ds {
+      font-size: 12.5px;
+      color: var(--sub);
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .dr-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn-sm {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(5, 12, 34, 0.85);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #cbd5e1;
+      font-size: 13.5px;
+      transition: all .2s ease;
+    }
+
+    .icon-btn-sm:hover {
+      border-color: var(--accent-glow);
+      color: var(--accent-glow);
+      transform: translateY(-2px);
+      box-shadow: 0 0 12px rgba(0, 136, 255, 0.3);
+    }
+
+    .icon-btn-sm.danger { color: #ff3366; }
+    .icon-btn-sm.danger:hover { border-color: #ff3366; background: rgba(255, 51, 102, 0.15); box-shadow: 0 0 12px rgba(255, 51, 102, 0.4); }
+    .icon-btn-sm.success { color: var(--green); }
+    .icon-btn-sm.success:hover { border-color: var(--green); background: rgba(0, 245, 155, 0.15); box-shadow: 0 0 12px rgba(0, 245, 155, 0.4); }
+    .icon-btn-sm.warn { color: var(--yellow); }
+
+    /* ===================== BADGES ===================== */
+    .badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: .4px;
+    }
+
+    .badge-pending { background: rgba(255, 183, 3, 0.15); color: var(--yellow); border: 1px solid rgba(255, 183, 3, 0.35); }
+    .badge-approved { background: rgba(0, 245, 155, 0.15); color: var(--green); border: 1px solid rgba(0, 245, 155, 0.35); }
+    .badge-rejected { background: rgba(255, 51, 102, 0.15); color: #ff3366; border: 1px solid rgba(255, 51, 102, 0.35); }
+    .badge-upcoming { background: rgba(0, 136, 255, 0.18); color: var(--accent-glow); border: 1px solid rgba(0, 136, 255, 0.35); }
+    .badge-completed { background: rgba(0, 245, 155, 0.15); color: var(--green); border: 1px solid rgba(0, 245, 155, 0.35); }
+    .badge-banned { background: rgba(255, 51, 102, 0.15); color: #ff3366; border: 1px solid rgba(255, 51, 102, 0.35); }
+    .badge-active { background: rgba(0, 245, 155, 0.15); color: var(--green); border: 1px solid rgba(0, 245, 155, 0.35); }
+
+    /* ===================== EMPTY STATE ===================== */
+    .empty-box {
+      text-align: center;
+      padding: 70px 20px;
+      color: var(--sub);
+    }
+
+    .empty-box i {
+      font-size: 40px;
+      color: var(--line);
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .empty-box p {
+      font-size: 13.5px;
+    }
+
+    /* ===================== FORMS / PANELS ===================== */
+    .panel {
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .panel h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+
+    .panel h3 i {
+      color: var(--accent-glow);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .form-field {
+      margin-bottom: 18px;
+    }
+
+    .form-field label {
+      font-size: 12px;
+      color: var(--sub);
+      margin-bottom: 8px;
+      display: block;
+      font-weight: 600;
+    }
+
+    .form-field input, .form-field select, .form-field textarea {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(3, 7, 20, 0.7);
+      color: #fff;
+      font-size: 13.5px;
+      font-family: inherit;
+      transition: all .25s ease;
+    }
+
+    .form-field textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+      outline: none;
+      border-color: var(--accent-glow);
+      box-shadow: 0 0 14px rgba(0, 136, 255, 0.3);
+      background: rgba(6, 14, 38, 0.85);
+    }
+
+    .form-field input:disabled {
+      color: var(--sub2);
+      background: rgba(2, 5, 15, 0.8);
+    }
+
+    .upload-block {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 20px;
+      padding: 18px;
+      background: rgba(3, 7, 20, 0.6);
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+    }
+
+    .upload-preview {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      background: rgba(16, 35, 82, 0.6);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .upload-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .upload-preview i {
+      color: var(--sub);
+      font-size: 22px;
+    }
+
+    .upload-text {
+      font-size: 13px;
+      color: var(--accent-glow);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .upload-text:hover {
+      text-decoration: underline;
+    }
+
+    .upload-hint {
+      font-size: 11.5px;
+      color: var(--sub2);
+      margin-top: 4px;
+    }
+
+    .chk-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      color: #d6e2f5;
+    }
+
+    .chk-row input {
+      width: 19px;
+      height: 19px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* ===================== MODAL ===================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 18, 0.85);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 550px;
+      max-height: 88vh;
+      overflow-y: auto;
+      background: linear-gradient(155deg, rgba(14, 30, 72, 0.95), rgba(5, 12, 32, 0.98));
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--line-hover);
+      border-radius: 24px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 136, 255, 0.25);
+      animation: modalPop .25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      background: rgba(10, 22, 54, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 2;
+    }
+
+    .modal-head h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(5, 12, 34, 0.8);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #ddd;
+      transition: all .2s;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 51, 102, 0.25);
+      color: #ff3366;
+      border-color: #ff3366;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-body-scroll-note {
+      font-size: 11.5px;
+      color: var(--sub2);
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    /* ===================== USER DETAIL ===================== */
+    .user-hero {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 20px;
+      background: linear-gradient(155deg, rgba(16, 35, 82, 0.6), rgba(5, 12, 34, 0.8));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      margin-bottom: 20px;
+    }
+
+    .user-hero .avatar-big {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #0d2a5c, #020612);
+      border: 2px solid var(--accent-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(0, 136, 255, 0.5);
+    }
+
+    .user-hero .avatar-big i {
+      font-size: 28px;
+      color: var(--accent-glow);
+    }
+
+    .user-hero .uh-name {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .user-hero .uh-id {
+      font-size: 12.5px;
+      color: var(--sub);
+      margin-top: 4px;
+    }
+
+    .mini-stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .mini-stat {
+      text-align: center;
+      padding: 15px 10px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(3, 7, 20, 0.65);
+    }
+
+    .mini-stat .n {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--accent-glow);
+    }
+
+    .mini-stat .l {
+      font-size: 10.5px;
+      color: var(--sub);
+      margin-top: 4px;
+    }
+
+    /* ===================== TOAST ===================== */
+    #toast-container {
+      position: fixed;
+      bottom: 26px;
+      right: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 999;
+    }
+
+    .toast {
+      background: rgba(12, 26, 64, 0.95);
+      backdrop-filter: blur(15px);
+      border: 1px solid var(--line-hover);
+      border-left: 4px solid var(--accent-glow);
+      padding: 15px 22px;
+      border-radius: 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 136, 255, 0.25);
+      animation: toastIn .25s ease;
+      max-width: 360px;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ===================== RESPONSIVE ===================== */
+    @media (max-width: 900px) {
+      #admin-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: var(--sidebar-w);
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .topbar .hamburger {
+        display: flex;
+      }
+
+      .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .content-area {
+        padding: 20px;
+      }
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 35;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+    }
+
+    .loader-spin {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== PASSWORD GATE ===================== -->
+  <div id="gate-frame">
+    <div class="gate-card">
+      <div class="gate-logo">
+        <i class="fa-solid fa-gamepad"></i>
+      </div>
+      <div class="gate-title">EFC TOUR Control</div>
+      <div class="gate-sub">Enter the admin security password to access</div>
+      <div class="gate-input-wrap">
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" id="gate-password" placeholder="Admin Password" autofocus>
+      </div>
+      <button class="gate-btn" onclick="checkGatePassword()">Unlock System</button>
+      <div class="gate-error" id="gate-error">Incorrect password. Try again.</div>
+      <div class="gate-note">
+        by <b> Team Ncl </b><br>
+        Support / Contact: <a href="" target="_blank">https://t.me/TEAM_NCL9</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== APP SHELL ===================== -->
+  <div id="admin-shell">
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar(false)"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-mini" id="sb-logo">
+          <i class="fa-solid fa-gamepad"></i>
+        </div>
+        <div class="brand-text">
+          <div class="bt1" id="sb-appname">EFC TOUR</div>
+          <div class="bt2">ADMIN CONTROL</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group-label">Overview</div>
+        <div class="nav-link active" data-page="dashboard" onclick="goPage('dashboard')">
+          <i class="fa-solid fa-gauge-high"></i>Dashboard
+        </div>
+
+        <div class="nav-group-label">Tournament</div>
+        <div class="nav-link" data-page="matches" onclick="goPage('matches')">
+          <i class="fa-solid fa-gamepad"></i>Matches
+        </div>
+        <div class="nav-link" data-page="categories" onclick="goPage('categories')">
+          <i class="fa-solid fa-layer-group"></i>Categories
+        </div>
+        <div class="nav-link" data-page="banners" onclick="goPage('banners')">
+          <i class="fa-solid fa-images"></i>Sliders / Banners
+        </div>
+        <div class="nav-link" data-page="rules" onclick="goPage('rules')">
+          <i class="fa-solid fa-scroll"></i>Match Rules
+        </div>
+        <div class="nav-link" data-page="notices" onclick="goPage('notices')">
+          <i class="fa-solid fa-bullhorn"></i>Notices &amp; Tutorials
+        </div>
+
+        <div class="nav-group-label">Users &amp; Wallet</div>
+        <div class="nav-link" data-page="users" onclick="goPage('users')">
+          <i class="fa-solid fa-users"></i>All Users
+        </div>
+        <div class="nav-link" data-page="bans" onclick="goPage('bans')">
+          <i class="fa-solid fa-user-slash"></i>Banned Users
+          <span class="nb" id="nav-ban-count" style="display:none;">0</span>
+        </div>
+        <div class="nav-link" data-page="deposits" onclick="goPage('deposits')">
+          <i class="fa-solid fa-arrow-down"></i>Deposits
+          <span class="nb" id="nav-dep-count" style="display:none;">0</span>
+        </div>
+        <div class="nav-link" data-page="withdrawals" onclick="goPage('withdrawals')">
+          <i class="fa-solid fa-arrow-up"></i>Withdrawals
+          <span class="nb" id="nav-wd-count" style="display:none;">0</span>
+        </div>
+
+        <div class="nav-group-label">Communication</div>
+        <div class="nav-link" data-page="notifications" onclick="goPage('notifications')">
+          <i class="fa-solid fa-bell"></i>Notifications
+        </div>
+
+        <div class="nav-group-label">Settings</div>
+        <div class="nav-link" data-page="payments" onclick="goPage('payments')">
+          <i class="fa-solid fa-money-check-dollar"></i>Payments &amp; Links
+        </div>
+        <div class="nav-link" data-page="appsettings" onclick="goPage('appsettings')">
+          <i class="fa-solid fa-sliders"></i>App Settings
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        by <b>devnbh2026</b><br>
+        <a href="https://t.me/NextBuildHub" target="_blank"><i class="fa-brands fa-telegram"></i> t.me/NextBuildHub</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-col">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;">
+          <div class="hamburger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
+          <div class="page-title"><i id="topbar-icon" class="fa-solid fa-gauge-high"></i> <span id="topbar-title">Dashboard</span></div>
+        </div>
+        <div class="topbar-right">
+          <div class="admin-chip"><i class="fa-solid fa-circle"></i> Admin Online</div>
+          <div class="lock-btn" onclick="lockPanel()" title="Lock Panel"><i class="fa-solid fa-lock"></i></div>
+        </div>
+      </header>
+
+      <main class="content-area" id="content-area">
+
+        <!-- ============ DASHBOARD ============ -->
+        <div class="page-view active" id="page-dashboard">
+          <div class="section-head">
+            <div>
+              <h2>Dashboard Overview</h2>
+              <div class="sh-sub">Live snapshot of your tournament platform</div>
+            </div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="sc-icon"><i class="fa-solid fa-users"></i></div>
+              <div class="sc-num" id="db-total-users">0</div>
+              <div class="sc-label">Total Registered Users</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-icon"><i class="fa-solid fa-gamepad"></i></div>
+              <div class="sc-num" id="db-live-matches">0</div>
+              <div class="sc-label">Active / Upcoming Matches</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-icon"><i class="fa-solid fa-arrow-up"></i></div>
+              <div class="sc-num" id="db-pending-wd">0</div>
+              <div class="sc-label">Pending Withdrawals</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-icon"><i class="fa-solid fa-arrow-down"></i></div>
+              <div class="sc-num" id="db-pending-dep">0</div>
+              <div class="sc-label">Pending Deposits</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-icon"><i class="fa-solid fa-flag-checkered"></i></div>
+              <div class="sc-num" id="db-completed-matches">0</div>
+              <div class="sc-label">Completed Matches</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-icon"><i class="fa-solid fa-user-slash"></i></div>
+              <div class="sc-num" id="db-banned-users">0</div>
+              <div class="sc-label">Banned Users</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-icon"><i class="fa-solid fa-layer-group"></i></div>
+              <div class="sc-num" id="db-categories">0</div>
+              <div class="sc-label">Categories</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-icon"><i class="fa-solid fa-images"></i></div>
+              <div class="sc-num" id="db-banners">0</div>
+              <div class="sc-label">Active Banners</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3><i class="fa-solid fa-bolt"></i> Quick Actions</h3>
+            <div class="toolbar">
+              <button class="btn btn-primary" onclick="goPage('matches'); setTimeout(()=>openMatchForm(null),150);"><i class="fa-solid fa-plus"></i> Add Match</button>
+              <button class="btn btn-ghost" onclick="goPage('deposits')"><i class="fa-solid fa-arrow-down"></i> Review Deposits</button>
+              <button class="btn btn-ghost" onclick="goPage('withdrawals')"><i class="fa-solid fa-arrow-up"></i> Review Withdrawals</button>
+              <button class="btn btn-ghost" onclick="goPage('notifications')"><i class="fa-solid fa-bell"></i> Send Notification</button>
+            </div>
+          </div>
+
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ USERS ============ -->
+        <div class="page-view" id="page-users">
+          <div class="section-head">
+            <div><h2>All Users</h2><div class="sh-sub">View, edit, ban, and manage user wallets</div></div>
+            <div class="toolbar">
+              <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="user-search" placeholder="Search by ID, name or phone" oninput="renderUsersList()"></div>
+            </div>
+          </div>
+          <div class="data-card" id="users-list"></div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ BANNED USERS ============ -->
+        <div class="page-view" id="page-bans">
+          <div class="section-head">
+            <div><h2>Banned Users</h2><div class="sh-sub">Users currently restricted from using the app</div></div>
+          </div>
+          <div class="data-card" id="bans-list"></div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ MATCHES ============ -->
+        <div class="page-view" id="page-matches">
+          <div class="section-head">
+            <div><h2>Matches</h2><div class="sh-sub">Create, edit, set room info, and declare winners</div></div>
+            <div class="toolbar">
+              <button class="btn btn-primary" onclick="openMatchForm(null)"><i class="fa-solid fa-plus"></i> Add Match</button>
+            </div>
+          </div>
+          <div class="tab-strip">
+            <div class="tab-chip active" data-s="upcoming" onclick="setMatchTab('upcoming')">Upcoming</div>
+            <div class="tab-chip" data-s="completed" onclick="setMatchTab('completed')">Completed</div>
+          </div>
+          <div class="data-card" id="matches-list"></div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ CATEGORIES ============ -->
+        <div class="page-view" id="page-categories">
+          <div class="section-head">
+            <div><h2>Match Categories</h2><div class="sh-sub">Unlimited categories, grouped into sections</div></div>
+            <div class="toolbar"><button class="btn btn-primary" onclick="openCategoryForm(null)"><i class="fa-solid fa-plus"></i> Add Category</button></div>
+          </div>
+          <div class="data-card" id="categories-list"></div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ BANNERS ============ -->
+        <div class="page-view" id="page-banners">
+          <div class="section-head">
+            <div><h2>Sliders / Banners</h2><div class="sh-sub">Unlimited banner slides, each with its own click-through link</div></div>
+            <div class="toolbar"><button class="btn btn-primary" onclick="openBannerForm(null)"><i class="fa-solid fa-plus"></i> Add Banner</button></div>
+          </div>
+          <div class="data-card" id="banners-list"></div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ RULES ============ -->
+        <div class="page-view" id="page-rules">
+          <div class="section-head">
+            <div><h2>Match Rules</h2><div class="sh-sub">Rules shown to every player before joining a match</div></div>
+            <div class="toolbar"><button class="btn btn-primary" onclick="openRuleForm(null)"><i class="fa-solid fa-plus"></i> Add Rule</button></div>
+          </div>
+          <div class="data-card" id="rules-list"></div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ NOTICES & TUTORIALS ============ -->
+        <div class="page-view" id="page-notices">
+          <div class="section-head">
+            <div><h2>Notices &amp; Tutorials</h2><div class="sh-sub">Pinned notices and tutorial links shown in the user app</div></div>
+            <div class="toolbar"><button class="btn btn-primary" onclick="openNoticeForm(null)"><i class="fa-solid fa-plus"></i> Add Notice</button></div>
+          </div>
+          <div class="data-card" id="notices-list"></div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ DEPOSITS ============ -->
+        <div class="page-view" id="page-deposits">
+          <div class="section-head">
+            <div><h2>Deposit Requests</h2><div class="sh-sub">Approve or reject bKash / Nagad / Rocket deposit requests</div></div>
+          </div>
+          <div class="tab-strip">
+            <div class="tab-chip active" data-s="pending" onclick="setDepositTab('pending')">Pending</div>
+            <div class="tab-chip" data-s="approved" onclick="setDepositTab('approved')">Approved</div>
+            <div class="tab-chip" data-s="rejected" onclick="setDepositTab('rejected')">Rejected</div>
+          </div>
+          <div class="data-card" id="deposits-list"></div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ WITHDRAWALS ============ -->
+        <div class="page-view" id="page-withdrawals">
+          <div class="section-head">
+            <div><h2>Withdrawal Requests</h2><div class="sh-sub">Approve or reject cashout requests</div></div>
+          </div>
+          <div class="tab-strip">
+            <div class="tab-chip active" data-s="pending" onclick="setWithdrawTab('pending')">Pending</div>
+            <div class="tab-chip" data-s="approved" onclick="setWithdrawTab('approved')">Approved</div>
+            <div class="tab-chip" data-s="rejected" onclick="setWithdrawTab('rejected')">Rejected</div>
+          </div>
+          <div class="data-card" id="withdrawals-list"></div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ NOTIFICATIONS ============ -->
+        <div class="page-view" id="page-notifications">
+          <div class="section-head"><div><h2>Notifications</h2><div class="sh-sub">Broadcast a message to every user's notification inbox</div></div></div>
+          <div class="panel">
+            <h3><i class="fa-solid fa-bullhorn"></i> Send New Notification</h3>
+            <div class="form-field"><label>Title</label><input type="text" id="notif-title" placeholder="নোটিফিকেশন শিরোনাম"></div>
+            <div class="form-field"><label>Message</label><textarea id="notif-body" placeholder="নোটিফিকেশন মেসেজ"></textarea></div>
+            <button class="btn btn-primary" onclick="sendNotification()"><i class="fa-solid fa-paper-plane"></i> Send to All Users</button>
+          </div>
+          <div class="data-card" id="notifications-list"></div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ PAYMENTS & LINKS ============ -->
+        <div class="page-view" id="page-payments">
+          <div class="section-head"><div><h2>Payments &amp; Links</h2><div class="sh-sub">Payment numbers, topup link, and support contact</div></div></div>
+          
+          <div class="panel">
+            <h3><i class="fa-solid fa-money-check-dollar"></i> Payment Gateway Numbers</h3>
+            <div class="form-grid">
+              <div class="form-field"><label>bKash Number</label><input type="text" id="pay-bkash" placeholder="01XXXXXXXXX"></div>
+              <div class="form-field"><label>Nagad Number</label><input type="text" id="pay-nagad" placeholder="01XXXXXXXXX"></div>
+            </div>
+            <div class="form-field"><label>Rocket Number</label><input type="text" id="pay-rocket" placeholder="01XXXXXXXXX"></div>
+            <button class="btn btn-primary" onclick="savePaymentSettings()"><i class="fa-solid fa-floppy-disk"></i> Save Payment Numbers</button>
+          </div>
+
+          <div class="panel">
+            <h3><i class="fa-solid fa-gem"></i> Diamond Topup</h3>
+            <div class="form-field"><label>Topup Website Link</label><input type="text" id="pay-topuplink" placeholder="https://..."></div>
+            <button class="btn btn-primary" onclick="savePaymentSettings()"><i class="fa-solid fa-floppy-disk"></i> Save Topup Link</button>
+          </div>
+
+          <div class="panel">
+            <h3><i class="fa-solid fa-headset"></i> Support Contact</h3>
+            <div class="form-grid">
+              <div class="form-field"><label>Support Link (Telegram/WhatsApp/etc.)</label><input type="text" id="pay-supportlink" placeholder="https://t.me/yoursupport"></div>
+              <div class="form-field"><label>Support Phone Number</label><input type="text" id="pay-supportnumber" placeholder="01XXXXXXXXX"></div>
+            </div>
+            <button class="btn btn-primary" onclick="savePaymentSettings()"><i class="fa-solid fa-floppy-disk"></i> Save Support Info</button>
+          </div>
+
+          <div class="panel">
+            <h3><i class="fa-solid fa-money-bill-wave"></i> Withdrawal Limits</h3>
+            <div class="form-field"><label>Daily Withdrawal Limit (times per day)</label><input type="number" id="pay-wdlimit" placeholder="2"></div>
+            <button class="btn btn-primary" onclick="savePaymentSettings()"><i class="fa-solid fa-floppy-disk"></i> Save Limit</button>
+          </div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+        <!-- ============ APP SETTINGS ============ -->
+        <div class="page-view" id="page-appsettings">
+          <div class="section-head"><div><h2>App Settings</h2><div class="sh-sub">App name, logo, and update link shown to users</div></div></div>
+          
+          <div class="panel">
+            <h3><i class="fa-solid fa-signature"></i> App Identity</h3>
+            <div class="upload-block">
+              <div class="upload-preview" id="app-logo-preview"><i class="fa-solid fa-image"></i></div>
+              <div>
+                <div class="upload-text" onclick="document.getElementById('app-logo-file').click()">Upload App Logo</div>
+                <div class="upload-hint">PNG/JPG recommended, square image</div>
+                <input type="file" id="app-logo-file" accept="image/*" style="display:none;" onchange="handleImageUpload(this,'applogo')">
+              </div>
+            </div>
+            <div class="form-field"><label>App Name</label><input type="text" id="app-name" placeholder="EFC TOUR"></div>
+            <button class="btn btn-primary" onclick="saveAppSettings()"><i class="fa-solid fa-floppy-disk"></i> Save App Identity</button>
+          </div>
+
+          <div class="panel">
+            <h3><i class="fa-solid fa-rotate"></i> App Update</h3>
+            <div class="form-grid">
+              <div class="form-field"><label>Latest Version</label><input type="text" id="app-version" placeholder="1.0.0"></div>
+              <div class="form-field"><label>Update / Download Link</label><input type="text" id="app-updatelink" placeholder="https://..."></div>
+            </div>
+            <div class="chk-row"><input type="checkbox" id="app-forceupdate"><span>Force update (users must update before continuing)</span></div>
+            <button class="btn btn-primary" onclick="saveAppSettings()"><i class="fa-solid fa-floppy-disk"></i> Save Update Settings</button>
+          </div>
+          <div class="page-footer-dev">Panel developed by <b>devnbh2026</b> &nbsp;•&nbsp; Support: <a href="https://t.me/NextBuildHub" target="_blank">t.me/NextBuildHub</a></div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ===================== MODALS ===================== -->
+  <!-- MATCH MODAL -->
+  <div class="modal-overlay" id="modal-match">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="match-modal-title">Add Match</h3>
+        <div class="modal-close" onclick="closeModal('modal-match')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body">
+        <div class="upload-block">
+          <div class="upload-preview" id="match-logo-preview"><i class="fa-solid fa-fire"></i></div>
+          <div>
+            <div class="upload-text" onclick="document.getElementById('m-file').click()">Upload Match Logo</div>
+            <div class="upload-hint">Square image works best</div>
+            <input type="file" id="m-file" accept="image/*" style="display:none;" onchange="handleImageUpload(this,'match')">
+          </div>
+        </div>
+        <div class="form-field"><label>Match Title</label><input type="text" id="m-title" placeholder="Match #101 — Solo Bermuda"></div>
+        <div class="form-field"><label>Rules Note (shown on card)</label><textarea id="m-note"></textarea></div>
+        <div class="form-grid">
+          <div class="form-field"><label>Category</label><select id="m-category"></select></div>
+          <div class="form-field"><label>Custom Match ID (optional)</label><input type="text" id="m-customid" placeholder="Auto-generated if empty"></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-field"><label>Start Time</label><input type="datetime-local" id="m-start"></div>
+          <div class="form-field"><label>Entry Fee (৳)</label><input type="number" id="m-fee" placeholder="50"></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-field"><label>Total Prize (৳)</label><input type="number" id="m-prize" placeholder="500"></div>
+          <div class="form-field"><label>Per Kill Prize (৳)</label><input type="number" id="m-perkill" placeholder="10"></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-field"><label>Total Slots</label><input type="number" id="m-slots" value="48"></div>
+          <div class="form-field"><label>Map</label><input type="text" id="m-map" value="Bermuda"></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-field"><label>Match Type</label><select id="m-type"><option value="Solo">Solo</option><option value="Duo">Duo</option><option value="Squad">Squad</option></select></div>
+          <div class="form-field"><label>POV</label><input type="text" id="m-pov" value="TPP"></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="saveMatch()">Save Match</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROOM MODAL -->
+  <div class="modal-overlay" id="modal-room">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Set Room ID & Password</h3>
+        <div class="modal-close" onclick="closeModal('modal-room')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body">
+        <div class="form-field"><label>Room ID</label><input type="text" id="room-id-input" placeholder="e.g. 1234567"></div>
+        <div class="form-field"><label>Room Password</label><input type="text" id="room-pass-input" placeholder="e.g. 1234"></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="saveRoomInfo()">Update Room Info</button>
+        <div class="modal-body-scroll-note">Updates instantly — joined players see this in their Room modal in real time.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAYERS MODAL -->
+  <div class="modal-overlay" id="modal-players">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Joined Players</h3>
+        <div class="modal-close" onclick="closeModal('modal-players')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body" id="players-body"></div>
+    </div>
+  </div>
+
+  <!-- WINNERS MODAL -->
+  <div class="modal-overlay" id="modal-winners">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Set Winners & Distribute Prizes</h3>
+        <div class="modal-close" onclick="closeModal('modal-winners')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:12px;color:var(--sub);margin-bottom:14px;">Pick a joined player, enter their prize amount, and credit it directly to their winning wallet. You can do this for as many players as needed, then mark the match completed.</p>
+        <div class="form-field"><label>Player</label><select id="win-player"></select></div>
+        <div class="form-field"><label>Prize Amount (৳)</label><input type="number" id="win-amount" placeholder="e.g. 200"></div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:12px;" onclick="creditWinner()">Credit Prize to Wallet</button>
+        <div id="winners-log" class="data-card" style="margin-bottom:14px;"></div>
+        <button class="btn btn-success" style="width:100%;" onclick="markMatchCompletedFromWinners()"><i class="fa-solid fa-check"></i> Mark Match as Completed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY MODAL -->
+  <div class="modal-overlay" id="modal-category">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="category-modal-title">Add Category</h3>
+        <div class="modal-close" onclick="closeModal('modal-category')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body">
+        <div class="upload-block">
+          <div class="upload-preview" id="cat-logo-preview"><i class="fa-solid fa-shield-halved"></i></div>
+          <div>
+            <div class="upload-text" onclick="document.getElementById('cat-file').click()">Upload Category Image</div>
+            <div class="upload-hint">Square image works best</div>
+            <input type="file" id="cat-file" accept="image/*" style="display:none;" onchange="handleImageUpload(this,'category')">
+          </div>
+        </div>
+        <div class="form-field"><label>Category Name</label><input type="text" id="cat-name" placeholder="Free Fire Clash Squad"></div>
+        <div class="form-field"><label>Section Header (groups categories on Home)</label><input type="text" id="cat-section" placeholder="e.g. MATCHES, TOURNAMENTS"></div>
+        <div class="form-field"><label>Icon (FontAwesome class, used if no image)</label><input type="text" id="cat-icon" placeholder="fa-solid fa-shield-halved"></div>
+        <div class="form-field"><label>Order</label><input type="number" id="cat-order" placeholder="0"></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="saveCategory()">Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BANNER MODAL -->
+  <div class="modal-overlay" id="modal-banner">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="banner-modal-title">Add Banner</h3>
+        <div class="modal-close" onclick="closeModal('modal-banner')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body">
+        <div class="upload-block">
+          <div class="upload-preview" id="banner-logo-preview"><i class="fa-solid fa-image"></i></div>
+          <div>
+            <div class="upload-text" onclick="document.getElementById('banner-file').click()">Upload Banner Image</div>
+            <div class="upload-hint">Horizontal 16:9 ratio recommended</div>
+            <input type="file" id="banner-file" accept="image/*" style="display:none;" onchange="handleImageUpload(this,'banner')">
+          </div>
+        </div>
+        <div class="form-field"><label>Title</label><input type="text" id="banner-title" placeholder="Daily Mega Tournament"></div>
+        <div class="form-field"><label>Subtitle</label><input type="text" id="banner-sub" placeholder="Join now and win huge rewards!"></div>
+        <div class="form-field"><label>Direct / Click-through Link</label><input type="text" id="banner-link" placeholder="https://..."></div>
+        <div class="form-field"><label>Order</label><input type="number" id="banner-order" placeholder="0"></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="saveBanner()">Save Banner</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RULE MODAL -->
+  <div class="modal-overlay" id="modal-rule">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="rule-modal-title">Add Rule</h3>
+        <div class="modal-close" onclick="closeModal('modal-rule')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body">
+        <div class="form-field"><label>Rule Text</label><textarea id="rule-text" placeholder="ইমুলেটর / হ্যাক ব্যবহার করলে কোনো প্রকার রিওয়ার্ড পাবেন না"></textarea></div>
+        <div class="form-field"><label>Order</label><input type="number" id="rule-order" placeholder="0"></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="saveRule()">Save Rule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTICE MODAL -->
+  <div class="modal-overlay" id="modal-notice">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="notice-modal-title">Add Notice</h3>
+        <div class="modal-close" onclick="closeModal('modal-notice')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body">
+        <div class="form-field"><label>Type</label><select id="notice-type"><option value="notice">Notice</option><option value="tutorial">Tutorial</option></select></div>
+        <div class="form-field"><label>Title</label><input type="text" id="notice-title" placeholder="নোটিশ টাইটেল"></div>
+        <div class="form-field"><label>Body / Description</label><textarea id="notice-body" placeholder="বিস্তারিত বিবরণ..."></textarea></div>
+        <div class="form-field"><label>Link (optional, e.g. YouTube tutorial URL)</label><input type="text" id="notice-link" placeholder="https://youtube.com/..."></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="saveNotice()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER MODAL -->
+  <div class="modal-overlay" id="modal-user">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>User Details</h3>
+        <div class="modal-close" onclick="closeModal('modal-user')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body" id="user-detail-body"></div>
+    </div>
+  </div>
+
+  <!-- BALANCE MODAL -->
+  <div class="modal-overlay" id="modal-balance">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Adjust Wallet Balance</h3>
+        <div class="modal-close" onclick="closeModal('modal-balance')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body">
+        <div class="form-field"><label>Balance Type</label><select id="bal-type"><option value="depositBalance">Deposit Balance</option><option value="winningBalance">Winning Balance</option></select></div>
+        <div class="form-field"><label>Action</label><select id="bal-action"><option value="add">Add</option><option value="deduct">Deduct</option></select></div>
+        <div class="form-field"><label>Amount (৳)</label><input type="number" id="bal-amount" placeholder="100"></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="adjustBalance()">Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT USER MODAL -->
+  <div class="modal-overlay" id="modal-edituser">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Edit User Info</h3>
+        <div class="modal-close" onclick="closeModal('modal-edituser')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body">
+        <div class="form-field"><label>Display Name / Username</label><input type="text" id="eu-name"></div>
+        <div class="form-field"><label>ID / In-game Tag</label><input type="text" id="eu-zvyid"></div>
+        <div class="form-field"><label>Phone</label><input type="text" id="eu-phone"></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="saveUserEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BAN USER MODAL -->
+  <div class="modal-overlay" id="modal-ban">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Ban User</h3>
+        <div class="modal-close" onclick="closeModal('modal-ban')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="modal-body">
+        <div class="form-field"><label>Ban Reason (shown to the user as a notice)</label><textarea id="ban-reason" placeholder="Suspicious activity / Rule violation"></textarea></div>
+        <button class="btn btn-danger" style="width:100%;" onclick="confirmBanUser()">Ban This User</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- ===================================================================== 
+       JAVASCRIPT LOGIC
+       ===================================================================== -->
+  <script>
+    // New Admin Password Set
+    const ADMIN_PASSWORD = "12345678";
+
+    // Firebase Configuration
+    const firebaseConfig = {
+  apiKey: "AIzaSyC90OySPk2krMF19TxQJepyPVcXlMsYPKI",
+  authDomain: "ripliteai.firebaseapp.com",
+  databaseURL: "https://ripliteai-default-rtdb.firebaseio.com",
+  projectId: "ripliteai",
+  storageBucket: "ripliteai.firebasestorage.app",
+  messagingSenderId: "827784084917",
+  appId: "1:827784084917:web:d857462530c26abfe66dfc",
+  measurementId: "G-ZFQ6B6DVDR"
+};
+
+    const fbApp = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const storage = firebase.storage();
+
+    /* ---------- Shim layer ---------- */
+    function collectionRef(name){ return db.collection(name); }
+    function docRef(colName, id){ return id ? db.collection(colName).doc(id) : db.collection(colName).doc(); }
+    function onSnap(ref, onNext, onError){ return ref.onSnapshot(onNext, onError || (()=>{})); }
+    async function addDocTo(colRef, data){ return colRef.add(data); }
+    async function updateDocAt(ref, data){ return ref.update(data); }
+    async function deleteDocAt(ref){ return ref.delete(); }
+    async function setDocAt(ref, data, opts){ return ref.set(data, opts||{}); }
+    async function getDocAt(ref){ return ref.get(); }
+    function serverTimestamp(){ return firebase.firestore.FieldValue.serverTimestamp(); }
+    function fieldIncrement(n){ return firebase.firestore.FieldValue.increment(n); }
+    async function runTxn(updateFn){ return db.runTransaction(updateFn); }
+
+    /* ---------- App state ---------- */
+    let allUsers = [];
+    let allCategories = [];
+    let allBanners = [];
+    let allMatches = [];
+    let allJoins = [];
+    let allDeposits = [];
+    let allWithdrawals = [];
+    let allNotifications = [];
+    let allRules = [];
+    let allNotices = [];
+    let appSettings = {
+      paymentNumbers: { bKash:"", Nagad:"", Rocket:"" },
+      diamondTopupLink: "",
+      supportLink: "",
+      supportNumber: "",
+      withdrawalDailyLimit: 2,
+      appName: "EFC TOUR",
+      appLogoUrl: "",
+      appVersion: "",
+      appUpdateLink: "",
+      forceUpdate: false
+    };
+
+    let currentMatchTab = "upcoming";
+    let currentDepositTab = "pending";
+    let currentWithdrawTab = "pending";
+    let editingMatchId = null;
+    let editingCategoryId = null;
+    let editingBannerId = null;
+    let editingRuleId = null;
+    let editingNoticeId = null;
+    let activeUserUid = null;
+    let activeMatchForWinners = null;
+    let pendingUpload = { match:null, category:null, banner:null, applogo:null };
+    let listenersStarted = false;
+
+    /* ===================== PASSWORD GATE ===================== */
+    function checkGatePassword(){
+      const val = document.getElementById('gate-password').value;
+      const err = document.getElementById('gate-error');
+      if(val === ADMIN_PASSWORD){
+        err.style.display = 'none';
+        unlockPanel();
+      }else{
+        err.style.display = 'block';
+        document.getElementById('gate-password').value = '';
+      }
+    }
+
+    document.getElementById('gate-password').addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter') checkGatePassword();
+    });
+
+    async function unlockPanel(){
+      document.getElementById('gate-frame').style.display = 'none';
+      document.getElementById('admin-shell').classList.add('active');
+      try{
+        if(!auth.currentUser){
+          await auth.signInAnonymously();
+        }
+      }catch(err){
+        toast('Firebase auth warning: ' + (err.message||err) + ' — some writes may be blocked by security rules.');
+      }
+      if(!listenersStarted){
+        listenersStarted = true;
+        startAllListeners();
+      }
+    }
+
+    function lockPanel(){
+      document.getElementById('admin-shell').classList.remove('active');
+      document.getElementById('gate-frame').style.display = 'flex';
+      document.getElementById('gate-password').value = '';
+    }
+
+    /* ===================== SIDEBAR / NAV ===================== */
+    const pageMeta = {
+      dashboard: { title:'Dashboard', icon:'fa-solid fa-gauge-high' },
+      matches: { title:'Matches', icon:'fa-solid fa-gamepad' },
+      categories: { title:'Categories', icon:'fa-solid fa-layer-group' },
+      banners: { title:'Sliders / Banners', icon:'fa-solid fa-images' },
+      rules: { title:'Match Rules', icon:'fa-solid fa-scroll' },
+      notices: { title:'Notices & Tutorials', icon:'fa-solid fa-bullhorn' },
+      users: { title:'All Users', icon:'fa-solid fa-users' },
+      bans: { title:'Banned Users', icon:'fa-solid fa-user-slash' },
+      deposits: { title:'Deposit Requests', icon:'fa-solid fa-arrow-down' },
+      withdrawals: { title:'Withdrawal Requests', icon:'fa-solid fa-arrow-up' },
+      notifications: { title:'Notifications', icon:'fa-solid fa-bell' },
+      payments: { title:'Payments & Links', icon:'fa-solid fa-money-check-dollar' },
+      appsettings: { title:'App Settings', icon:'fa-solid fa-sliders' }
+    };
+
+    function goPage(page){
+      document.querySelectorAll('.page-view').forEach(v=>v.classList.remove('active'));
+      document.getElementById('page-'+page).classList.add('active');
+      document.querySelectorAll('.nav-link').forEach(n=>n.classList.toggle('active', n.dataset.page===page));
+      const meta = pageMeta[page];
+      document.getElementById('topbar-title').textContent = meta.title;
+      document.getElementById('topbar-icon').className = meta.icon;
+      document.getElementById('content-area').scrollTop = 0;
+      toggleSidebar(false);
+    }
+
+    function toggleSidebar(force){
+      const sb = document.getElementById('sidebar');
+      const ov = document.getElementById('sidebar-overlay');
+      const open = typeof force === 'boolean' ? force : !sb.classList.contains('open');
+      sb.classList.toggle('open', open);
+      ov.classList.toggle('active', open);
+    }
+
+    /* ===================== TOAST / MODAL HELPERS ===================== */
+    function toast(msg){
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(()=>{
+        t.style.opacity='0';
+        t.style.transition='opacity .3s';
+        setTimeout(()=>t.remove(),300);
+      }, 3200);
+    }
+
+    function openModal(id){
+      document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id){
+      document.getElementById(id).classList.remove('active');
+    }
+
+    document.querySelectorAll('.modal-overlay').forEach(ov=>{
+      ov.addEventListener('click', e=>{
+        if(e.target===ov) ov.classList.remove('active');
+      });
+    });
+
+    /* ---------- Image Upload ---------- */
+    async function handleImageUpload(inputEl, kind){
+      const file = inputEl.files[0];
+      if(!file) return;
+      const previewId = kind==='applogo' ? 'app-logo-preview' : kind+'-logo-preview';
+      const previewEl = document.getElementById(previewId);
+      previewEl.innerHTML = `<i class="fa-solid fa-spinner loader-spin"></i>`;
+      try{
+        const path = `${kind}s/${Date.now()}_${file.name}`;
+        const ref = storage.ref(path);
+        await ref.put(file);
+        const url = await ref.getDownloadURL();
+        pendingUpload[kind] = url;
+        previewEl.innerHTML = `<img src="${url}">`;
+      }catch(err){
+        toast('Image upload failed: ' + (err.message||''));
+        previewEl.innerHTML = `<i class="fa-solid fa-image"></i>`;
+      }
+    }
+
+    function formatDate(ts){
+      if(!ts) return '--';
+      const d = new Date(ts);
+      const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      let h = d.getHours();
+      const ampm = h>=12?'PM':'AM';
+      h = h%12;
+      if(h===0)h=12;
+      const mm = d.getMinutes().toString().padStart(2,'0');
+      return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} ${h}:${mm} ${ampm}`;
+    }
+
+    function toDatetimeLocal(ts){
+      const d = new Date(ts);
+      const pad = n => String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    /* ===================== REALTIME LISTENERS ===================== */
+    function startAllListeners(){
+      onSnap(collectionRef('users'), (snap)=>{
+        allUsers = snap.docs.map(d=>({ uid:d.id, ...d.data() }));
+        renderDashboard();
+        renderUsersList();
+        renderBansList();
+        populateWinnerPlayerSelect();
+      });
+
+      onSnap(collectionRef('categories').orderBy('order','asc'), (snap)=>{
+        allCategories = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+        renderCategoriesList();
+        populateMatchCategorySelect();
+        renderDashboard();
+      }, ()=>{
+        allCategories=[];
+        renderCategoriesList();
+      });
+
+      onSnap(collectionRef('banners').orderBy('order','asc'), (snap)=>{
+        allBanners = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+        renderBannersList();
+        renderDashboard();
+      }, ()=>{
+        allBanners=[];
+        renderBannersList();
+      });
+
+      onSnap(collectionRef('matches'), (snap)=>{
+        allMatches = snap.docs.map(d=>{
+          const data = d.data();
+          return {
+            id:d.id,
+            ...data,
+            startAt: data.startAt && data.startAt.toMillis ? data.startAt.toMillis() : data.startAt
+          };
+        });
+        renderMatchesList();
+        renderDashboard();
+      });
+
+      onSnap(collectionRef('joins'), (snap)=>{
+        allJoins = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+      });
+
+      onSnap(collectionRef('deposits'), (snap)=>{
+        allDeposits = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+        renderDepositsList();
+        renderDashboard();
+      });
+
+      onSnap(collectionRef('withdrawals'), (snap)=>{
+        allWithdrawals = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+        renderWithdrawalsList();
+        renderDashboard();
+      });
+
+      onSnap(collectionRef('notifications').orderBy('createdAt','desc'), (snap)=>{
+        allNotifications = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+        renderNotificationsList();
+      }, ()=>{
+        allNotifications=[];
+      });
+
+      onSnap(collectionRef('rules').orderBy('order','asc'), (snap)=>{
+        allRules = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+        renderRulesList();
+      }, ()=>{
+        allRules=[];
+        renderRulesList();
+      });
+
+      onSnap(collectionRef('notices').orderBy('createdAt','desc'), (snap)=>{
+        allNotices = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+        renderNoticesList();
+      }, ()=>{
+        allNotices=[];
+        renderNoticesList();
+      });
+
+      onSnap(docRef('settings','app'), (snap)=>{
+        if(snap.exists){
+          const d = snap.data();
+          appSettings = { ...appSettings, ...d };
+          hydratePaymentForm();
+          hydrateAppSettingsForm();
+        }
+      });
+    }
+
+    /* ===================== DASHBOARD ===================== */
+    function renderDashboard(){
+      document.getElementById('db-total-users').textContent = allUsers.length;
+      document.getElementById('db-live-matches').textContent = allMatches.filter(m=>m.status!=='completed').length;
+      document.getElementById('db-completed-matches').textContent = allMatches.filter(m=>m.status==='completed').length;
+      document.getElementById('db-pending-dep').textContent = allDeposits.filter(d=>d.status==='pending').length;
+      document.getElementById('db-pending-wd').textContent = allWithdrawals.filter(w=>w.status==='pending').length;
+      document.getElementById('db-banned-users').textContent = allUsers.filter(u=>u.banned).length;
+      document.getElementById('db-categories').textContent = allCategories.length;
+      document.getElementById('db-banners').textContent = allBanners.length;
+
+      const depCount = allDeposits.filter(d=>d.status==='pending').length;
+      const wdCount = allWithdrawals.filter(w=>w.status==='pending').length;
+      const banCount = allUsers.filter(u=>u.banned).length;
+
+      setNavBadge('nav-dep-count', depCount);
+      setNavBadge('nav-wd-count', wdCount);
+      setNavBadge('nav-ban-count', banCount);
+    }
+
+    function setNavBadge(id, count){
+      const el = document.getElementById(id);
+      el.textContent = count;
+      el.style.display = count>0 ? 'flex' : 'none';
+    }
+
+    /* ===================== USERS ===================== */
+    function renderUsersList(){
+      const list = document.getElementById('users-list');
+      if(!list) return;
+      const q = (document.getElementById('user-search').value||'').trim().toLowerCase();
+      let filtered = allUsers;
+      if(q){
+        filtered = allUsers.filter(u =>
+          (u.zvyId||'').toLowerCase().includes(q) ||
+          (u.name||'').toLowerCase().includes(q) ||
+          (u.phone||'').toLowerCase().includes(q) ||
+          (u.email||'').toLowerCase().includes(q)
+        );
+      }
+      if(filtered.length===0){
+        list.innerHTML = `<div class="empty-box"><i class="fa-solid fa-user-slash"></i><p>No users found.</p></div>`;
+        return;
+      }
+      list.innerHTML = filtered.map(u=>`
+        <div class="data-row">
+          <div class="dr-thumb"><i class="fa-solid fa-user"></i></div>
+          <div class="dr-main">
+            <div class="dt">${u.name||'Unnamed'} — #${u.zvyId||'--'} ${u.banned?'<span class="badge badge-banned">BANNED</span>':''}</div>
+            <div class="ds">
+              <span>${u.phone||'no phone'}</span>
+              <span>•</span><span>Dep ৳${u.depositBalance||0}</span>
+              <span>•</span><span>Win ৳${u.winningBalance||0}</span>
+              <span>•</span><span>Device: ${u.deviceId||'N/A'}</span>
+            </div>
+          </div>
+          <div class="dr-actions">
+            <div class="icon-btn-sm" onclick="openUserDetail('${u.uid}')" title="View / Manage"><i class="fa-solid fa-eye"></i></div>
+          </div>
+        </div>`).join('');
+    }
+
+    function renderBansList(){
+      const list = document.getElementById('bans-list');
+      if(!list) return;
+      const banned = allUsers.filter(u=>u.banned);
+      if(banned.length===0){
+        list.innerHTML = `<div class="empty-box"><i class="fa-solid fa-circle-check"></i><p>No banned users. Everything looks clean.</p></div>`;
+        return;
+      }
+      list.innerHTML = banned.map(u=>`
+        <div class="data-row">
+          <div class="dr-thumb"><i class="fa-solid fa-user-slash"></i></div>
+          <div class="dr-main">
+            <div class="dt">${u.name||'Unnamed'} — #${u.zvyId||'--'}</div>
+            <div class="ds"><span>${u.phone||'no phone'}</span><span>•</span><span>Reason: ${u.banReason||'not specified'}</span></div>
+          </div>
+          <div class="dr-actions">
+            <button class="btn btn-success btn-sm" onclick="unbanUser('${u.uid}')"><i class="fa-solid fa-user-check"></i> Unban</button>
+          </div>
+        </div>`).join('');
+    }
+
+    function openUserDetail(uid){
+      activeUserUid = uid;
+      const u = allUsers.find(x=>x.uid===uid);
+      if(!u) return;
+      const joinedCount = allJoins.filter(j=>j.userId===uid).length;
+      const body = document.getElementById('user-detail-body');
+      body.innerHTML = `
+        <div class="user-hero">
+          <div class="avatar-big"><i class="fa-solid fa-user"></i></div>
+          <div>
+            <div class="uh-name">${u.name||'Unnamed'} ${u.banned?'<span class="badge badge-banned">BANNED</span>':'<span class="badge badge-active">ACTIVE</span>'}</div>
+            <div class="uh-id">User ID #${u.zvyId||'--'} • ${u.phone||'no phone'} • ${u.email||'no email'}</div>
+          </div>
+        </div>
+        <div class="mini-stat-row">
+          <div class="mini-stat"><div class="n">${u.matchesPlayed||0}</div><div class="l">Matches</div></div>
+          <div class="mini-stat"><div class="n">${u.totalKills||0}</div><div class="l">Kills</div></div>
+          <div class="mini-stat"><div class="n">৳${u.totalEarnings||0}</div><div class="l">Earnings</div></div>
+        </div>
+        <div class="mini-stat-row">
+          <div class="mini-stat"><div class="n">৳${u.depositBalance||0}</div><div class="l">Deposit Bal.</div></div>
+          <div class="mini-stat"><div class="n">৳${u.winningBalance||0}</div><div class="l">Winning Bal.</div></div>
+          <div class="mini-stat"><div class="n">${joinedCount}</div><div class="l">Joins</div></div>
+        </div>
+        <div class="panel" style="margin-bottom:12px;padding:14px;">
+          <div style="font-size:11.5px;color:var(--sub);">Device ID (from user's device, if captured by the app)</div>
+          <div style="font-size:13px;font-weight:700;margin-top:6px;">${u.deviceId || 'Not available'}</div>
+        </div>
+        <div class="toolbar" style="margin-bottom:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="openUserEditForm('${u.uid}')"><i class="fa-solid fa-pen"></i> Edit Info</button>
+          <button class="btn btn-ghost btn-sm" onclick="openBalanceForm('${u.uid}')"><i class="fa-solid fa-sliders"></i> Adjust Wallet</button>
+          ${u.banned ? `<button class="btn btn-success btn-sm" onclick="unbanUser('${u.uid}')"><i class="fa-solid fa-user-check"></i> Unban</button>` : `<button class="btn btn-danger btn-sm" onclick="openBanForm('${u.uid}')"><i class="fa-solid fa-user-slash"></i> Ban User</button>`}
+        </div>
+      `;
+      openModal('modal-user');
+    }
+
+    function openUserEditForm(uid){
+      const u = allUsers.find(x=>x.uid===uid);
+      activeUserUid = uid;
+      document.getElementById('eu-name').value = u.name||'';
+      document.getElementById('eu-zvyid').value = u.zvyId||'';
+      document.getElementById('eu-phone').value = u.phone||'';
+      openModal('modal-edituser');
+    }
+
+    async function saveUserEdit(){
+      const name = document.getElementById('eu-name').value.trim();
+      const zvyId = document.getElementById('eu-zvyid').value.trim();
+      const phone = document.getElementById('eu-phone').value.trim();
+      if(!name || !zvyId){
+        toast('Name and ID are required');
+        return;
+      }
+      await updateDocAt(docRef('users', activeUserUid), { name, zvyId, phone });
+      toast('User info updated');
+      closeModal('modal-edituser');
+      closeModal('modal-user');
+    }
+
+    function openBalanceForm(uid){
+      activeUserUid = uid;
+      document.getElementById('bal-amount').value = '';
+      openModal('modal-balance');
+    }
+
+    async function adjustBalance(){
+      const type = document.getElementById('bal-type').value;
+      const action = document.getElementById('bal-action').value;
+      const amt = parseInt(document.getElementById('bal-amount').value);
+      if(!amt){
+        toast('Enter an amount');
+        return;
+      }
+      const delta = action==='add' ? amt : -amt;
+      await updateDocAt(docRef('users', activeUserUid), { [type]: fieldIncrement(delta) });
+      toast('Wallet balance updated');
+      closeModal('modal-balance');
+    }
+
+    function openBanForm(uid){
+      activeUserUid = uid;
+      document.getElementById('ban-reason').value = '';
+      openModal('modal-ban');
+    }
+
+    async function confirmBanUser(){
+      const reason = document.getElementById('ban-reason').value.trim();
+      await updateDocAt(docRef('users', activeUserUid), {
+        banned: true,
+        banReason: reason || 'No reason specified',
+        bannedAt: serverTimestamp()
+      });
+      toast('User has been banned');
+      closeModal('modal-ban');
+      closeModal('modal-user');
+    }
+
+    async function unbanUser(uid){
+      if(!confirm('Unban this user?')) return;
+      await updateDocAt(docRef('users', uid), {
+        banned: false,
+        banReason: firebase.firestore.FieldValue.delete()
+      });
+      toast('User has been unbanned');
+      closeModal('modal-user');
+    }
+
+    /* ===================== CATEGORIES ===================== */
+    function renderCategoriesList(){
+      const list = document.getElementById('categories-list');
+      if(!list) return;
+      if(allCategories.length===0){
+        list.innerHTML = `<div class="empty-box"><i class="fa-solid fa-layer-group"></i><p>No categories yet. Click "Add Category" to create one.</p></div>`;
+        return;
+      }
+      list.innerHTML = allCategories.map(c=>`
+        <div class="data-row">
+          <div class="dr-thumb">${c.logoUrl?`<img src="${c.logoUrl}">`:`<i class="${c.icon||'fa-solid fa-shield-halved'}"></i>`}</div>
+          <div class="dr-main"><div class="dt">${c.name||'(unnamed)'}</div><div class="ds"><span>${c.section||'MATCHES'}</span><span>•</span><span>order ${c.order||0}</span></div></div>
+          <div class="dr-actions">
+            <div class="icon-btn-sm" onclick="openCategoryForm('${c.id}')"><i class="fa-solid fa-pen"></i></div>
+            <div class="icon-btn-sm danger" onclick="deleteCategory('${c.id}')"><i class="fa-solid fa-trash"></i></div>
+          </div>
+        </div>`).join('');
+    }
+
+    function openCategoryForm(id){
+      editingCategoryId = id;
+      pendingUpload.category = null;
+      const preview = document.getElementById('cat-logo-preview');
+      if(id){
+        const c = allCategories.find(x=>x.id===id);
+        document.getElementById('category-modal-title').textContent = 'Edit Category';
+        document.getElementById('cat-name').value = c.name||'';
+        document.getElementById('cat-section').value = c.section||'';
+        document.getElementById('cat-icon').value = c.icon||'';
+        document.getElementById('cat-order').value = c.order||0;
+        preview.innerHTML = c.logoUrl ? `<img src="${c.logoUrl}">` : `<i class="${c.icon||'fa-solid fa-shield-halved'}"></i>`;
+        pendingUpload.category = c.logoUrl || null;
+      }else{
+        document.getElementById('category-modal-title').textContent = 'Add Category';
+        document.getElementById('cat-name').value='';
+        document.getElementById('cat-section').value='';
+        document.getElementById('cat-icon').value='fa-solid fa-shield-halved';
+        document.getElementById('cat-order').value = allCategories.length;
+        preview.innerHTML = `<i class="fa-solid fa-shield-halved"></i>`;
+      }
+      openModal('modal-category');
+    }
+
+    async function saveCategory(){
+      const data = {
+        name: document.getElementById('cat-name').value.trim(),
+        section: document.getElementById('cat-section').value.trim() || 'MATCHES',
+        icon: document.getElementById('cat-icon').value.trim() || 'fa-solid fa-shield-halved',
+        order: parseInt(document.getElementById('cat-order').value)||0,
+        logoUrl: pendingUpload.category || null
+      };
+      if(!data.name){
+        toast('Category name is required');
+        return;
+      }
+      if(editingCategoryId) await updateDocAt(docRef('categories', editingCategoryId), data);
+      else await addDocTo(collectionRef('categories'), { ...data, createdAt: serverTimestamp() });
+      toast('Category saved');
+      closeModal('modal-category');
+    }
+
+    async function deleteCategory(id){
+      if(!confirm('Delete this category?')) return;
+      await deleteDocAt(docRef('categories', id));
+      toast('Category deleted');
+    }
+
+    function populateMatchCategorySelect(){
+      const sel = document.getElementById('m-category');
+      if(!sel) return;
+      const current = sel.value;
+      sel.innerHTML = allCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+      if(current) sel.value = current;
+    }
+
+    /* ===================== BANNERS ===================== */
+    function renderBannersList(){
+      const list = document.getElementById('banners-list');
+      if(!list) return;
+      if(allBanners.length===0){
+        list.innerHTML = `<div class="empty-box"><i class="fa-solid fa-images"></i><p>No banners yet. Click "Add Banner" to create one.</p></div>`;
+        return;
+      }
+      list.innerHTML = allBanners.map(b=>`
+        <div class="data-row">
+          <div class="dr-thumb">${b.imageUrl?`<img src="${b.imageUrl}">`:`<i class="fa-solid fa-image"></i>`}</div>
+          <div class="dr-main"><div class="dt">${b.title||'(untitled)'}</div><div class="ds"><span>${b.linkUrl||'no link set'}</span></div></div>
+          <div class="dr-actions">
+            <div class="icon-btn-sm" onclick="openBannerForm('${b.id}')"><i class="fa-solid fa-pen"></i></div>
+            <div class="icon-btn-sm danger" onclick="deleteBanner('${b.id}')"><i class="fa-solid fa-trash"></i></div>
+          </div>
+        </div>`).join('');
+    }
+
+    function openBannerForm(id){
+      editingBannerId = id;
+      pendingUpload.banner = null;
+      const preview = document.getElementById('banner-logo-preview');
+      if(id){
+        const b = allBanners.find(x=>x.id===id);
+        document.getElementById('banner-modal-title').textContent = 'Edit Banner';
+        document.getElementById('banner-title').value = b.title||'';
+        document.getElementById('banner-sub').value = b.subtitle||'';
+        document.getElementById('banner-link').value = b.linkUrl||'';
+        document.getElementById('banner-order').value = b.order||0;
+        preview.innerHTML = b.imageUrl ? `<img src="${b.imageUrl}">` : `<i class="fa-solid fa-image"></i>`;
+        pendingUpload.banner = b.imageUrl || null;
+      }else{
+        document.getElementById('banner-modal-title').textContent = 'Add Banner';
+        document.getElementById('banner-title').value='';
+        document.getElementById('banner-sub').value='';
+        document.getElementById('banner-link').value='';
+        document.getElementById('banner-order').value = allBanners.length;
+        preview.innerHTML = `<i class="fa-solid fa-image"></i>`;
+      }
+      openModal('modal-banner');
+    }
+
+    async function saveBanner(){
+      const data = {
+        title: document.getElementById('banner-title').value.trim(),
+        subtitle: document.getElementById('banner-sub').value.trim(),
+        linkUrl: document.getElementById('banner-link').value.trim(),
+        order: parseInt(document.getElementById('banner-order').value)||0,
+        imageUrl: pendingUpload.banner || null
+      };
+      if(editingBannerId) await updateDocAt(docRef('banners', editingBannerId), data);
+      else await addDocTo(collectionRef('banners'), { ...data, createdAt: serverTimestamp() });
+      toast('Banner saved');
+      closeModal('modal-banner');
+    }
+
+    async function deleteBanner(id){
+      if(!confirm('Delete this banner?')) return;
+      await deleteDocAt(docRef('banners', id));
+      toast('Banner deleted');
+    }
+
+    /* ===================== RULES ===================== */
+    function renderRulesList(){
+      const list = document.getElementById('rules-list');
+      if(!list) return;
+      if(allRules.length===0){
+        list.innerHTML = `<div class="empty-box"><i class="fa-solid fa-scroll"></i><p>No rules yet. Click "Add Rule" to create one.</p></div>`;
+        return;
+      }
+      list.innerHTML = allRules.map(r=>`
+        <div class="data-row">
+          <div class="dr-thumb"><i class="fa-solid fa-scroll"></i></div>
+          <div class="dr-main"><div class="dt">${r.text||''}</div><div class="ds"><span>order ${r.order||0}</span></div></div>
+          <div class="dr-actions">
+            <div class="icon-btn-sm" onclick="openRuleForm('${r.id}')"><i class="fa-solid fa-pen"></i></div>
+            <div class="icon-btn-sm danger" onclick="deleteRule('${r.id}')"><i class="fa-solid fa-trash"></i></div>
+          </div>
+        </div>`).join('');
+    }
+
+    function openRuleForm(id){
+      editingRuleId = id;
+      if(id){
+        const r = allRules.find(x=>x.id===id);
+        document.getElementById('rule-modal-title').textContent = 'Edit Rule';
+        document.getElementById('rule-text').value = r.text||'';
+        document.getElementById('rule-order').value = r.order||0;
+      }else{
+        document.getElementById('rule-modal-title').textContent = 'Add Rule';
+        document.getElementById('rule-text').value = '';
+        document.getElementById('rule-order').value = allRules.length;
+      }
+      openModal('modal-rule');
+    }
+
+    async function saveRule(){
+      const text = document.getElementById('rule-text').value.trim();
+      const order = parseInt(document.getElementById('rule-order').value)||0;
+      if(!text){
+        toast('Rule text is required');
+        return;
+      }
+      if(editingRuleId) await updateDocAt(docRef('rules', editingRuleId), { text, order });
+      else await addDocTo(collectionRef('rules'), { text, order, createdAt: serverTimestamp() });
+      toast('Rule saved');
+      closeModal('modal-rule');
+    }
+
+    async function deleteRule(id){
+      if(!confirm('Delete this rule?')) return;
+      await deleteDocAt(docRef('rules', id));
+      toast('Rule deleted');
+    }
+
+    /* ===================== NOTICES & TUTORIALS ===================== */
+    function renderNoticesList(){
+      const list = document.getElementById('notices-list');
+      if(!list) return;
+      if(allNotices.length===0){
+        list.innerHTML = `<div class="empty-box"><i class="fa-solid fa-bullhorn"></i><p>No notices or tutorials yet.</p></div>`;
+        return;
+      }
+      list.innerHTML = allNotices.map(n=>`
+        <div class="data-row">
+          <div class="dr-thumb"><i class="fa-solid ${n.type==='tutorial'?'fa-circle-play':'fa-bullhorn'}"></i></div>
+          <div class="dr-main"><div class="dt">${n.title||''} <span class="badge badge-upcoming">${n.type==='tutorial'?'TUTORIAL':'NOTICE'}</span></div><div class="ds"><span>${n.body||''}</span></div></div>
+          <div class="dr-actions">
+            <div class="icon-btn-sm" onclick="openNoticeForm('${n.id}')"><i class="fa-solid fa-pen"></i></div>
+            <div class="icon-btn-sm danger" onclick="deleteNotice('${n.id}')"><i class="fa-solid fa-trash"></i></div>
+          </div>
+        </div>`).join('');
+    }
+
+    function openNoticeForm(id){
+      editingNoticeId = id;
+      if(id){
+        const n = allNotices.find(x=>x.id===id);
+        document.getElementById('notice-modal-title').textContent = 'Edit Notice';
+        document.getElementById('notice-type').value = n.type||'notice';
+        document.getElementById('notice-title').value = n.title||'';
+        document.getElementById('notice-body').value = n.body||'';
+        document.getElementById('notice-link').value = n.linkUrl||'';
+      }else{
+        document.getElementById('notice-modal-title').textContent = 'Add Notice';
+        document.getElementById('notice-type').value = 'notice';
+        document.getElementById('notice-title').value = '';
+        document.getElementById('notice-body').value = '';
+        document.getElementById('notice-link').value = '';
+      }
+      openModal('modal-notice');
+    }
+
+    async function saveNotice(){
+      const data = {
+        type: document.getElementById('notice-type').value,
+        title: document.getElementById('notice-title').value.trim(),
+        body: document.getElementById('notice-body').value.trim(),
+        linkUrl: document.getElementById('notice-link').value.trim()
+      };
+      if(!data.title){
+        toast('Title is required');
+        return;
+      }
+      if(editingNoticeId) await updateDocAt(docRef('notices', editingNoticeId), data);
+      else await addDocTo(collectionRef('notices'), { ...data, createdAt: serverTimestamp() });
+      toast('Saved');
+      closeModal('modal-notice');
+    }
+
+    async function deleteNotice(id){
+      if(!confirm('Delete this item?')) return;
+      await deleteDocAt(docRef('notices', id));
+      toast('Deleted');
+    }
+
+    /* ===================== MATCHES ===================== */
+    function setMatchTab(status){
+      currentMatchTab = status;
+      document.querySelectorAll('#page-matches .tab-chip').forEach(t=>t.classList.toggle('active', t.dataset.s===status));
+      renderMatchesList();
+    }
+
+    function renderMatchesList(){
+      const list = document.getElementById('matches-list');
+      if(!list) return;
+      const filtered = allMatches.filter(m => currentMatchTab==='completed' ? m.status==='completed' : m.status!=='completed');
+      if(filtered.length===0){
+        list.innerHTML = `<div class="empty-box"><i class="fa-solid fa-gamepad"></i><p>No matches in this tab yet.</p></div>`;
+        return;
+      }
+      list.innerHTML = filtered.map(m=>{
+        const cat = allCategories.find(c=>c.id===m.category);
+        return `
+        <div class="data-row">
+          <div class="dr-thumb">${m.logoUrl?`<img src="${m.logoUrl}">`:`<i class="fa-solid fa-fire"></i>`}</div>
+          <div class="dr-main">
+            <div class="dt">#${m.id} — ${m.title||''}</div>
+            <div class="ds">
+              <span>${cat?cat.name:'uncategorized'}</span><span>•</span>
+              <span>${m.joined||0}/${m.totalSlots||0} joined</span><span>•</span>
+              <span>${formatDate(m.startAt)}</span>
+              <span class="badge ${m.status==='completed'?'badge-completed':'badge-upcoming'}">${m.status==='completed'?'COMPLETED':'UPCOMING'}</span>
+            </div>
+          </div>
+          <div class="dr-actions">
+            <div class="icon-btn-sm" onclick="openPlayersList('${m.id}')" title="Joined Players"><i class="fa-solid fa-users"></i></div>
+            <div class="icon-btn-sm" onclick="openRoomForm('${m.id}')" title="Room ID/Pass"><i class="fa-solid fa-key"></i></div>
+            <div class="icon-btn-sm success" onclick="openWinnersForm('${m.id}')" title="Winners & Prizes"><i class="fa-solid fa-trophy"></i></div>
+            <div class="icon-btn-sm" onclick="openMatchForm('${m.id}')" title="Edit"><i class="fa-solid fa-pen"></i></div>
+            <div class="icon-btn-sm danger" onclick="deleteMatch('${m.id}')" title="Delete"><i class="fa-solid fa-trash"></i></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function openMatchForm(id){
+      editingMatchId = id;
+      pendingUpload.match = null;
+      populateMatchCategorySelect();
+      const preview = document.getElementById('match-logo-preview');
+      if(id){
+        const m = allMatches.find(x=>x.id===id);
+        document.getElementById('match-modal-title').textContent = 'Edit Match';
+        document.getElementById('m-title').value = m.title||'';
+        document.getElementById('m-note').value = m.note||'';
+        document.getElementById('m-category').value = m.category||'';
+        document.getElementById('m-customid').value = m.id;
+        document.getElementById('m-customid').disabled = true;
+        if(m.startAt) document.getElementById('m-start').value = toDatetimeLocal(m.startAt);
+        document.getElementById('m-fee').value = m.fee||0;
+        document.getElementById('m-prize').value = m.prize||0;
+        document.getElementById('m-perkill').value = m.perKill||0;
+        document.getElementById('m-slots').value = m.totalSlots||48;
+        document.getElementById('m-map').value = m.map||'';
+        document.getElementById('m-type').value = /squad|quad|4\s*v\s*4/i.test(String(m.type||m.title||'')) ? 'Squad' : /duo|2\s*v\s*2/i.test(String(m.type||m.title||'')) ? 'Duo' : 'Solo';
+        document.getElementById('m-pov').value = m.pov||'TPP';
+        preview.innerHTML = m.logoUrl ? `<img src="${m.logoUrl}">` : `<i class="fa-solid fa-fire"></i>`;
+        pendingUpload.match = m.logoUrl || null;
+      }else{
+        document.getElementById('match-modal-title').textContent = 'Add Match';
+        document.getElementById('m-title').value = '';
+        document.getElementById('m-note').value = 'ম্যাচ এ জয়েন করার আগে রুলস পরে নেন। রুলস ফলো না করলে রিওয়ার্ড দেয়া হবে না ও রিফান্ড পাবেন না।';
+        document.getElementById('m-customid').value = '';
+        document.getElementById('m-customid').disabled = false;
+        document.getElementById('m-start').value = '';
+        document.getElementById('m-fee').value = '';
+        document.getElementById('m-prize').value = '';
+        document.getElementById('m-perkill').value = '';
+        document.getElementById('m-slots').value = 48;
+        document.getElementById('m-map').value = 'Bermuda';
+        document.getElementById('m-type').value = 'Solo';
+        document.getElementById('m-pov').value = 'TPP';
+        preview.innerHTML = `<i class="fa-solid fa-fire"></i>`;
+      }
+      openModal('modal-match');
+    }
+
+    async function saveMatch(){
+      const title = document.getElementById('m-title').value.trim();
+      const category = document.getElementById('m-category').value;
+      const startVal = document.getElementById('m-start').value;
+      if(!title || !category || !startVal){
+        toast('Title, category and start time are required');
+        return;
+      }
+      const data = {
+        title,
+        category,
+        note: document.getElementById('m-note').value.trim(),
+        startAt: new Date(startVal).getTime(),
+        fee: parseInt(document.getElementById('m-fee').value)||0,
+        prize: parseInt(document.getElementById('m-prize').value)||0,
+        perKill: parseInt(document.getElementById('m-perkill').value)||0,
+        totalSlots: parseInt(document.getElementById('m-slots').value)||48,
+        map: document.getElementById('m-map').value.trim(),
+        type: ['Solo','Duo','Squad'].includes(document.getElementById('m-type').value) ? document.getElementById('m-type').value : 'Solo',
+        pov: document.getElementById('m-pov').value.trim(),
+        logoUrl: pendingUpload.match || null
+      };
+      if(editingMatchId){
+        await updateDocAt(docRef('matches', editingMatchId), data);
+      }else{
+        const customId = document.getElementById('m-customid').value.trim();
+        const matchId = customId || String(Math.floor(10000 + Math.random()*89999));
+        await setDocAt(docRef('matches', matchId), {
+          ...data,
+          joined:0,
+          status:'upcoming',
+          roomId:'',
+          roomPass:'',
+          createdAt: serverTimestamp()
+        });
+      }
+      toast('Match saved');
+      closeModal('modal-match');
+    }
+
+    async function deleteMatch(id){
+      if(!confirm('Delete match #'+id+'? All paid slot bookings will be refunded to players’ deposit balance.')) return;
+      try{
+        const matchRef=docRef('matches',id);
+        const joinSnap=await collectionRef('joins').where('matchId','==',id).get();
+        for(const joinDoc of joinSnap.docs){
+          const joinRef=docRef('joins',joinDoc.id);
+          await runTxn(async tx=>{
+            const jSnap=await tx.get(joinRef); if(!jSnap.exists) return;
+            const j=jSnap.data(); if(j.refunded) return;
+            const userRef=docRef('users',j.userId), uSnap=await tx.get(userRef);
+            if(!uSnap.exists) throw new Error('Cannot refund booking '+joinDoc.id+': user profile missing');
+            const u=uSnap.data();
+            const legacyMatch=allMatches.find(m=>m.id===id);
+            const fee=Number(j.fee ?? (legacyMatch?.fee) ?? 0);
+            const depRefund=Number.isFinite(Number(j.feeFromDeposit)) ? Number(j.feeFromDeposit) : fee;
+            const winRefund=Number.isFinite(Number(j.feeFromWinning)) ? Number(j.feeFromWinning) : 0;
+            tx.update(userRef,{depositBalance:(Number(u.depositBalance)||0)+depRefund,winningBalance:(Number(u.winningBalance)||0)+winRefund});
+            tx.update(joinRef,{refunded:true,refundAmount:depRefund+winRefund,refundedAt:serverTimestamp(),refundReason:'match_deleted'});
+          });
+        }
+        const slotSnap=await collectionRef('matchSlots').where('matchId','==',id).get();
+        for(const slotDoc of slotSnap.docs) await deleteDocAt(docRef('matchSlots',slotDoc.id));
+        await deleteDocAt(matchRef);
+        toast('Match deleted. All booked slot fees have been refunded.');
+      }catch(err){toast('Delete/refund failed: '+(err.message||'Please retry'));}
+    }
+
+    function openRoomForm(matchId){
+      editingMatchId = matchId;
+      const m = allMatches.find(x=>x.id===matchId);
+      document.getElementById('room-id-input').value = m.roomId||'';
+      document.getElementById('room-pass-input').value = m.roomPass||'';
+      openModal('modal-room');
+    }
+
+    async function saveRoomInfo(){
+      const roomId = document.getElementById('room-id-input').value.trim();
+      const roomPass = document.getElementById('room-pass-input').value.trim();
+      await updateDocAt(docRef('matches', editingMatchId), { roomId, roomPass });
+      toast('Room info updated — joined players see it instantly');
+      closeModal('modal-room');
+    }
+
+    function openPlayersList(matchId){
+      const players = allJoins.filter(j=>j.matchId===matchId);
+      const body = document.getElementById('players-body');
+      if(players.length===0){
+        body.innerHTML = `<div class="empty-box"><i class="fa-solid fa-user-group"></i><p>No players have joined match #${matchId} yet.</p></div>`;
+      }else{
+        body.innerHTML = `<div class="data-card">` + players.map(p=>{
+          const u = allUsers.find(x=>x.uid===p.userId);
+          return `<div class="data-row">
+            <div class="dr-thumb"><i class="fa-solid fa-hashtag"></i></div>
+            <div class="dr-main"><div class="dt">Slot ${p.slot} — ${p.ign||''}</div><div class="ds"><span>FF UID: ${p.uid||''}</span><span>•</span><span>${u?u.name+' (#'+u.zvyId+')':'unknown user'}</span></div></div>
+          </div>`;
+        }).join('') + `</div>`;
+      }
+      openModal('modal-players');
+    }
+
+    function openWinnersForm(matchId){
+      activeMatchForWinners = matchId;
+      populateWinnerPlayerSelect();
+      document.getElementById('win-amount').value = '';
+      document.getElementById('winners-log').innerHTML = '';
+      openModal('modal-winners');
+    }
+
+    function populateWinnerPlayerSelect(){
+      const sel = document.getElementById('win-player');
+      if(!sel || !activeMatchForWinners) return;
+      const players = allJoins.filter(j=>j.matchId===activeMatchForWinners);
+      sel.innerHTML = players.map(p=>{
+        const u = allUsers.find(x=>x.uid===p.userId);
+        return `<option value="${p.userId}">${u?u.name:'unknown'} — Slot ${p.slot} (${p.ign})</option>`;
+      }).join('');
+    }
+
+    async function creditWinner(){
+      const uid = document.getElementById('win-player').value;
+      const amount = parseInt(document.getElementById('win-amount').value);
+      if(!uid){
+        toast('No players joined this match yet');
+        return;
+      }
+      if(!amount){
+        toast('Enter a prize amount');
+        return;
+      }
+      await updateDocAt(docRef('users', uid), {
+        winningBalance: fieldIncrement(amount),
+        totalEarnings: fieldIncrement(amount)
+      });
+      const u = allUsers.find(x=>x.uid===uid);
+      const log = document.getElementById('winners-log');
+      const row = document.createElement('div');
+      row.className = 'data-row';
+      row.innerHTML = `<div class="dr-thumb"><i class="fa-solid fa-trophy" style="color:var(--gold);"></i></div><div class="dr-main"><div class="dt">${u?u.name:uid}</div><div class="ds">Credited ৳${amount}</div></div>`;
+      log.prepend(row);
+      document.getElementById('win-amount').value = '';
+      toast(`৳${amount} credited to ${u?u.name:'player'}'s winning wallet`);
+    }
+
+    async function markMatchCompletedFromWinners(){
+      await updateDocAt(docRef('matches', activeMatchForWinners), { status:'completed' });
+      toast('Match marked as completed');
+      closeModal('modal-winners');
+    }
+
+    /* ===================== DEPOSITS ===================== */
+    function setDepositTab(status){
+      currentDepositTab = status;
+      document.querySelectorAll('#page-deposits .tab-chip').forEach(t=>t.classList.toggle('active', t.dataset.s===status));
+      renderDepositsList();
+    }
+
+    function renderDepositsList(){
+      const list = document.getElementById('deposits-list');
+      if(!list) return;
+      const filtered = allDeposits.filter(d=>d.status===currentDepositTab);
+      if(filtered.length===0){
+        list.innerHTML = `<div class="empty-box"><i class="fa-solid fa-sack-dollar"></i><p>No ${currentDepositTab} deposits.</p></div>`;
+        return;
+      }
+      list.innerHTML = filtered.map(d=>`
+        <div class="data-row">
+          <div class="dr-thumb"><i class="fa-solid fa-arrow-down"></i></div>
+          <div class="dr-main">
+            <div class="dt">${d.userName||d.userId} — ৳${d.amount}</div>
+            <div class="ds"><span>${d.method}</span><span>•</span><span>${d.senderNumber}</span><span>•</span><span>TrxID: ${d.trxId}</span><span class="badge badge-${d.status}">${d.status.toUpperCase()}</span></div>
+          </div>
+          ${d.status==='pending' ? `
+          <div class="dr-actions">
+            <div class="icon-btn-sm success" onclick="approveDeposit('${d.id}','${d.userId}',${d.amount})"><i class="fa-solid fa-check"></i></div>
+            <div class="icon-btn-sm danger" onclick="rejectDeposit('${d.id}')"><i class="fa-solid fa-xmark"></i></div>
+          </div>` : ''}
+        </div>`).join('');
+    }
+
+    async function approveDeposit(depId, userId, amount){
+      try{
+        await updateDocAt(docRef('users', userId), {
+          depositBalance: fieldIncrement(amount)
+        });
+        await updateDocAt(docRef('deposits', depId), { status:'approved' });
+        toast('Deposit approved and credited');
+      }catch(err){
+        toast('Failed: ' + err.message);
+      }
+    }
+
+    async function rejectDeposit(depId){
+      await updateDocAt(docRef('deposits', depId), { status:'rejected' });
+      toast('Deposit rejected');
+    }
+
+    /* ===================== WITHDRAWALS ===================== */
+    function setWithdrawTab(status){
+      currentWithdrawTab = status;
+      document.querySelectorAll('#page-withdrawals .tab-chip').forEach(t=>t.classList.toggle('active', t.dataset.s===status));
+      renderWithdrawalsList();
+    }
+
+    function renderWithdrawalsList(){
+      const list = document.getElementById('withdrawals-list');
+      if(!list) return;
+      const filtered = allWithdrawals.filter(w=>w.status===currentWithdrawTab);
+      if(filtered.length===0){
+        list.innerHTML = `<div class="empty-box"><i class="fa-solid fa-money-bill-wave"></i><p>No ${currentWithdrawTab} withdrawals.</p></div>`;
+        return;
+      }
+      list.innerHTML = filtered.map(w=>`
+        <div class="data-row">
+          <div class="dr-thumb"><i class="fa-solid fa-arrow-up"></i></div>
+          <div class="dr-main">
+            <div class="dt">${w.userName||w.userId} — ৳${w.amount}</div>
+            <div class="ds"><span>${w.method}</span><span>•</span><span>${w.number}</span><span class="badge badge-${w.status}">${w.status.toUpperCase()}</span></div>
+          </div>
+          ${w.status==='pending' ? `
+          <div class="dr-actions">
+            <div class="icon-btn-sm success" onclick="approveWithdrawal('${w.id}','${w.userId}',${w.amount})"><i class="fa-solid fa-check"></i></div>
+            <div class="icon-btn-sm danger" onclick="rejectWithdrawal('${w.id}')"><i class="fa-solid fa-xmark"></i></div>
+          </div>` : ''}
+        </div>`).join('');
+    }
+
+    async function approveWithdrawal(wdId, userId, amount){
+      try{
+        const userRef = docRef('users', userId);
+        await runTxn(async (tx)=>{
+          const uSnap = await tx.get(userRef);
+          const uData = uSnap.data();
+          if((uData.winningBalance||0) < amount) throw new Error('User has insufficient winning balance');
+          tx.update(userRef, { winningBalance: (uData.winningBalance||0) - amount });
+        });
+        await updateDocAt(docRef('withdrawals', wdId), { status:'approved' });
+        toast('Withdrawal approved');
+      }catch(err){
+        toast('Failed: ' + err.message);
+      }
+    }
+
+    async function rejectWithdrawal(wdId){
+      await updateDocAt(docRef('withdrawals', wdId), { status:'rejected' });
+      toast('Withdrawal rejected');
+    }
+
+    /* ===================== NOTIFICATIONS ===================== */
+    function renderNotificationsList(){
+      const list = document.getElementById('notifications-list');
+      if(!list) return;
+      if(allNotifications.length===0){
+        list.innerHTML = `<div class="empty-box"><i class="fa-solid fa-bell-slash"></i><p>No notifications sent yet.</p></div>`;
+        return;
+      }
+      list.innerHTML = allNotifications.map(n=>`
+        <div class="data-row">
+          <div class="dr-thumb"><i class="fa-solid fa-bullhorn"></i></div>
+          <div class="dr-main"><div class="dt">${n.title}</div><div class="ds"><span>${n.body}</span></div></div>
+          <div class="dr-actions"><div class="icon-btn-sm danger" onclick="deleteNotification('${n.id}')"><i class="fa-solid fa-trash"></i></div></div>
+        </div>`).join('');
+    }
+
+    async function sendNotification(){
+      const title = document.getElementById('notif-title').value.trim();
+      const body = document.getElementById('notif-body').value.trim();
+      if(!title || !body){
+        toast('Please enter both title and message');
+        return;
+      }
+      await addDocTo(collectionRef('notifications'), { title, body, createdAt: serverTimestamp() });
+      toast('Notification sent to all users');
+      document.getElementById('notif-title').value = '';
+      document.getElementById('notif-body').value = '';
+    }
+
+    async function deleteNotification(id){
+      if(!confirm('Delete this notification?')) return;
+      await deleteDocAt(docRef('notifications', id));
+    }
+
+    /* ===================== PAYMENTS & LINKS SETTINGS ===================== */
+    function hydratePaymentForm(){
+      document.getElementById('pay-bkash').value = appSettings.paymentNumbers.bKash || '';
+      document.getElementById('pay-nagad').value = appSettings.paymentNumbers.Nagad || '';
+      document.getElementById('pay-rocket').value = appSettings.paymentNumbers.Rocket || '';
+      document.getElementById('pay-topuplink').value = appSettings.diamondTopupLink || '';
+      document.getElementById('pay-supportlink').value = appSettings.supportLink || '';
+      document.getElementById('pay-supportnumber').value = appSettings.supportNumber || '';
+      document.getElementById('pay-wdlimit').value = appSettings.withdrawalDailyLimit || 2;
+    }
+
+    async function savePaymentSettings(){
+      const data = {
+        paymentNumbers: {
+          bKash: document.getElementById('pay-bkash').value.trim(),
+          Nagad: document.getElementById('pay-nagad').value.trim(),
+          Rocket: document.getElementById('pay-rocket').value.trim()
+        },
+        diamondTopupLink: document.getElementById('pay-topuplink').value.trim(),
+        supportLink: document.getElementById('pay-supportlink').value.trim(),
+        supportNumber: document.getElementById('pay-supportnumber').value.trim(),
+        withdrawalDailyLimit: parseInt(document.getElementById('pay-wdlimit').value)||2
+      };
+      await setDocAt(docRef('settings','app'), data, { merge:true });
+      toast('Payment & link settings saved');
+    }
+
+    /* ===================== APP SETTINGS ===================== */
+    function hydrateAppSettingsForm(){
+      document.getElementById('app-name').value = appSettings.appName || 'EFC TOUR';
+      document.getElementById('app-version').value = appSettings.appVersion || '';
+      document.getElementById('app-updatelink').value = appSettings.appUpdateLink || '';
+      document.getElementById('app-forceupdate').checked = !!appSettings.forceUpdate;
+      document.getElementById('sb-appname').textContent = appSettings.appName || 'EFC TOUR';
+      const logoPreview = document.getElementById('app-logo-preview');
+      const sbLogo = document.getElementById('sb-logo');
+      if(appSettings.appLogoUrl){
+        logoPreview.innerHTML = `<img src="${appSettings.appLogoUrl}">`;
+        sbLogo.innerHTML = `<img src="${appSettings.appLogoUrl}">`;
+        pendingUpload.applogo = appSettings.appLogoUrl;
+      }
+    }
+
+    async function saveAppSettings(){
+      const data = {
+        appName: document.getElementById('app-name').value.trim() || 'EFC TOUR',
+        appVersion: document.getElementById('app-version').value.trim(),
+        appUpdateLink: document.getElementById('app-updatelink').value.trim(),
+        forceUpdate: document.getElementById('app-forceupdate').checked,
+        appLogoUrl: pendingUpload.applogo || appSettings.appLogoUrl || null
+      };
+      await setDocAt(docRef('settings','app'), data, { merge:true });
+      toast('App settings saved');
+    }
+  </script>
+</body>
+</html>
